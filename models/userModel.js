@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "password is required"],
+    select: false,
   },
   role: {
     type: String,
@@ -47,6 +48,15 @@ const userSchema = new mongoose.Schema({
     default: 0,
   },
 });
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+});
+
+userSchema.methods.checkPassword = async (password, hashPassword) => {
+  return await bcrypt.compare(password, hashPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 

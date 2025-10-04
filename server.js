@@ -9,6 +9,7 @@ dotenv.config({
 const HOST = process.env.HOST;
 const PORT = process.env.PORT;
 const DATABASE = process.env.DB;
+const NODE_ENV = process.env.NODE_ENV;
 
 mongoose
   .connect(DATABASE)
@@ -16,6 +17,6 @@ mongoose
   .catch((error) => console.log(error));
 
 app.listen(PORT, () => {
-  console.log("API is launched");
+  console.log(`${NODE_ENV.toUpperCase()} API is launched`);
   console.log(`http://${HOST}:${PORT}`);
 });
