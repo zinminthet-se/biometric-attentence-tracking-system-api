@@ -37,10 +37,6 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     default: "student",
-    enum: {
-      values: ["admin", "student"],
-      message: `role must be "admin" or "student"`,
-    },
   },
   haveFaceSample: {
     //face image to sample when autheticating
