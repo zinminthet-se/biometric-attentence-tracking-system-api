@@ -1,5 +1,4 @@
 const Admin = require("../models/adminModel");
-const User = require("../models/userModel");
 const AppError = require("../utilities/AppError");
 const catchAsync = require("../utilities/catchAsync");
 const FormError = require("../utilities/FormError");
@@ -7,9 +6,9 @@ const { generateToken } = require("../utilities/jwtUtil");
 const STATUS_CODES = require("../utilities/StatusCode");
 
 exports.login = catchAsync(async (req, res, next) => {
-  const requiredFields = ["rollNumber", "password"];
+  const requiredFields = ["name", "password"];
   const missingFieldMessages = {};
-  const { rollNumber, password } = req.body || {};
+  const { name, password } = req.body || {};
 
   requiredFields.forEach((field) => {
     if (!req.body || !req.body[field]) {
@@ -27,31 +26,41 @@ exports.login = catchAsync(async (req, res, next) => {
     );
   }
 
-  const user = await User.findOne({
-    $or: [{ rollNumber: rollNumber }, { name: rollNumber }],
+  const admin = await Admin.findOne({
+    name,
+    role: { $eq: "admin" },
   }).select("+password");
 
-  console.error(rollNumber, password);
-  if (!user)
+  console.log("this is admin", admin);
+
+  if (!admin)
+    return next(new AppError("Admin is not found", STATUS_CODES.BAD_REQUEST));
+
+  const isCorrectPassword = await admin.checkPassword(password, admin.password);
+  if (!isCorrectPassword)
     return next(
-      new AppError("User is not registered", STATUS_CODES.BAD_REQUEST)
+      new AppError(
+        "admin name or password is not correct",
+        STATUS_CODES.BAD_REQUEST
+      )
     );
 
-  console.error("this is error", user);
-  const correctPassword = await user.checkPassword(password, user.password);
+  console.log(admin);
+  const token = generateToken(admin._id, admin.role);
 
-  if (!correctPassword)
-    return next(
-      new AppError("Rollnumber or password is wrong", STATUS_CODES.BAD_REQUEST)
-    );
-
-  const token = generateToken({ id: user._id, role: user.role });
-
-  res.status(200).json({
+  return res.status(STATUS_CODES.OK).json({
     status: "success",
+    token,
     data: {
-      token: token,
-      user,
+      admin: admin,
     },
   });
 });
+
+exports.forgotPassword = (req, res, next) => {
+  return res.status(200).json({
+    status: "forgot",
+  });
+};
+
+exports.deleteAccount = (req, res, next) => {};

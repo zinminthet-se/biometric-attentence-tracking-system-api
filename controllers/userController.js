@@ -158,3 +158,11 @@ exports.createUser = async (req, res, next) => {
     },
   });
 };
+
+exports.deleteAllUsers = catchAsync(async (req, res, next) => {
+  await User.deleteMany();
+  return res.status(STATUS_CODES.NO_CONTENT).json({
+    status: "success",
+    message: "all users have been deleted",
+  });
+});

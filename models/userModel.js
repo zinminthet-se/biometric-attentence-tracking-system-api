@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  university: {
+    type: String,
+    default: "UCSMDY",
+  },
 });
 
 userSchema.pre("save", async function (next) {

@@ -1,3 +1,15 @@
+const handleJwtError = (err) => {
+  err.isOperational = true;
+  err.message = "Token is invalid";
+  return err;
+};
+
+const handleCastError = (err) => {
+  err.isOperational = true;
+  err.message = "Invalid url parameter is detected";
+  return err;
+};
+
 const sendErrorProduction = (err, req, res, next) => {
   // operational errors
   if (err.isOperational) {
@@ -34,7 +46,14 @@ exports.globalErrorController = (err, req, res, next) => {
   } else if (process.env.NODE_ENV == "production") {
     //custom error handlings
     //placeholders
-
-    sendErrorProduction(err, req, res);
+    let error = { ...err, name: err.name };
+    if (error.name == "JsonWebTokenError") {
+      error = handleJwtError(error);
+    }
+    console.log(error);
+    if (error.name == "CastError") {
+      error = handleCastError(error);
+    }
+    sendErrorProduction(error, req, res);
   }
 };

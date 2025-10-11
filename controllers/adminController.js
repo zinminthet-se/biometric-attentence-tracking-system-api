@@ -129,3 +129,11 @@ exports.createAdmin = async (req, res, next) => {
     },
   });
 };
+
+exports.deleteAllAdmins = catchAsync(async (req, res, next) => {
+  await Admin.deleteMany();
+  return res.status(STATUS_CODES.NO_CONTENT).json({
+    status: "success",
+    message: "all admins have been deleted",
+  });
+});
